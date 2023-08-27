@@ -21,6 +21,8 @@ maintainer:         lukas.schneiderbauer@gmail.com
 -- category:
 extra-source-files: CHANGELOG.md
 
+tested-with: GHC==9.2.8
+
 library
     exposed-modules:  Heumilk.State
                       Heumilk.Network
