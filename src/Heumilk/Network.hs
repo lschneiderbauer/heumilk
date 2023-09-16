@@ -5,6 +5,7 @@ import Heumilk.Nat
 -- import Debug.Trace
 
 import qualified Data.List as L
+import Data.List.Extra
 import qualified Data.Matrix.Unboxed as M
 import qualified Data.Vector as V
 import Control.Monad
@@ -37,6 +38,7 @@ class (Eq a, Show a) => Route a where
   isCoveredBy :: a -> a -> Bool
   isCoveredBy tc1 tc2 = sites tc1 `L.isSubsequenceOf` sites tc2
   crossesSite :: a -> Site -> Bool
+  crossesRoute :: a -> a -> Bool
   isSingleton :: a -> Bool
   segments :: a -> [TransportSegment]
   prune :: a -> (Maybe a, TransportSegment) -- the dropped transport segment
@@ -56,6 +58,7 @@ instance Route TruckCycle where
   appendSite tc s = tc { tcSites = s : tcSites tc }
   dest _ = Origin -- dummy for now
   crossesSite tc site = site `elem` sites tc
+  crossesRoute tc1 tc2 = not $ disjoint (tcSites tc1) (tcSites tc2)
   segments = segsFromList . sites
   isSingleton tc = length (tcSites tc) == 1
   volume = initialLoad
@@ -82,6 +85,7 @@ instance Route PalletRoute where
   appendSite (MkPalletRoute ss n) s = MkPalletRoute (s:ss) n
   dest = head . prSites
   crossesSite pr site = site `elem` tail (prSites pr)
+  crossesRoute pr1 pr2 = not $ disjoint (prSites pr1) (prSites pr2)
   isSingleton pr = length (prSites pr) == 1
   segments pr = segsFromList (sites pr)
   (=|=) pr1 pr2 = prSites pr1 == prSites pr2
@@ -93,6 +97,10 @@ instance Route PalletRoute where
         | length ss <= 1 = Nothing  -- a PalletRoute with no sites should be Nothing
         | otherwise      = Just (MkPalletRoute (tail ss) n)
 
+instance Semigroup PalletRoute where -- not commutative!
+  pr1 <> pr2 = MkPalletRoute (prSites pr2 ++ prSites pr1) (pallets pr2)
+
+
 segsFromList :: Eq a => [a] -> [(a, a)]
 segsFromList = zip <*> tail
 
@@ -103,25 +111,26 @@ instance Measurable TN where
   cost tn = sum $ tc_cost <$> routes tn
     where
       tc_cost tc = sum $ ts_cost <$> segments tc
-      ts_cost = uncurry (distance tn)
+      ts_cost = uncurry (distance $ distances tn)
 
 
 instance Measurable PN where
   cost = cost . tnFromPn
 
-type DistanceMatrix a = M.Matrix a
+type DistanceMatrix = M.Matrix Float
+distance :: DistanceMatrix -> Site -> Site -> Float
+distance mat Origin Origin = mat M.! (0,0)
+distance mat Origin (Site n) = mat M.! (0, n)
+distance mat (Site n) (Site m) = mat M.! (n, m)
+distance mat (Site n) Origin = mat M.! (0, n)
+
 
 data Route a => Network a = MkNetwork { routes :: [a]
-                                        , distances :: DistanceMatrix Float }
+                                        , distances :: DistanceMatrix }
 
 totalVolume :: Route a => Network a -> NPallets
 totalVolume net = sum $ volume <$> routes net
 
-distance :: Route a => Network a -> Site -> Site -> Float
-distance net Origin Origin = distances net M.! (0,0)
-distance net Origin (Site n) = distances net M.! (0, n)
-distance net (Site n) (Site m) = distances net M.! (n, m)
-distance net (Site n) Origin = distances net M.! (0, n)
 
 instance Route a => Show (Network a) where
   show net = unlines (show <$> routes net)
@@ -149,15 +158,7 @@ replacePRoute :: PN ->                -- network in which to make the replacemen
 replacePRoute net old_route Nothing = net { routes = L.delete old_route (routes net ) }
 replacePRoute net old_route (Just new_route) = net {routes = replace (routes net) }
   where
-    replace = (:) new_route . L.delete old_route 
-{-
-replacePRoute net old_route (Just new_route) = net {routes = replace <$> routes net }
-  where
-    replace r
-      | r =|= old_route = new_route
-      | otherwise       = r
-replacePRoute net old_route Nothing = net {routes = filter (not . (=|= old_route)) $ routes net }
--}
+    replace = (:) new_route . L.delete old_route
 
 --  Leaf Routes are defined by having a destination
 --  that is not within another route in that network
@@ -165,24 +166,17 @@ leafRoutes :: Route a => Network a -> [a]
 leafRoutes net = filter isLeafRoute $ routes net where
   isLeafRoute r = not $ any (`crossesSite` dest r) (routes net)
 
+leafRouteWithSite :: Route a => Network a -> Site -> Maybe a
+leafRouteWithSite net site =
+  case filter (\r -> head (sites r) == site) (leafRoutes net) of
+    [] -> Nothing
+    (s:ss) -> Just s
+
 coveredRoutes :: Route a => Network a -> a -> [a]
 coveredRoutes net route = filter (`isCoveredBy` route) (routes net)
 
 type TN = Network TruckCycle
 type PN = Network PalletRoute
-
-{- instance Semigroup TN where
-  (<>) tn1 tn2 = MkNetwork { routes = routes tn1 <> routes tn2, distances = }
-
-instance Monoid TN where
-  mempty = MkNetwork []
-
-instance Semigroup PN where
-  (<>) pn1 pn2 = undefined
-
-instance Monoid PN where
-  mempty = MkNetwork [] -}
-
 
 pruneLeafPRoute ::  Network PalletRoute ->  ( Network PalletRoute  -- pruned network
                                             , PalletRoute          -- route that has been pruned
@@ -229,7 +223,7 @@ consumeTruckLoad :: TruckCycle -> NPallets -> (TruckCycle, NPallets)
 consumeTruckLoad tc new_load = (tc { initialLoad = new_truckload }, rest)
   where
     new_truckload = min (initialLoad tc + new_load) truckCapacity
-    rest = max (new_load - (new_truckload - initialLoad tc)) 0 
+    rest = max (new_load - (new_truckload - initialLoad tc)) 0
 
 dropTruckCycles :: TN -> [TruckCycle] -> TN
 dropTruckCycles tn [] = tn
@@ -251,7 +245,7 @@ addRequiredTruckLoads tn sites seg req_pallets
   where
     existing_tcs = trucksOnSegment tn seg
     rest = req_pallets - sum (initialLoad <$> existing_tcs)
-    
+
     -- initialLoad <$> existing_tcs <- this is a potential problem.
     -- we are relying on the fact that we do a recursive "cleanup" here which
     -- is something this function should not rely on. In general this calculation
@@ -272,11 +266,20 @@ addRequiredTruckLoads tn sites seg req_pallets
     new_tn = addTrucks (new_tn_dropped { routes = routes new_tn_dropped ++ mod_tcs }) sites new_rest
 
 
-routelessNet :: Route a => DistanceMatrix Float -> Network a
+routelessNet :: Route a => DistanceMatrix -> Network a
 routelessNet = MkNetwork []
 
 isRouteless :: Route a => Network a -> Bool
 isRouteless = null . routes
+
+-- return s subnetwork returning a Network only involving [Site] and the routes that cross these
+-- routes
+subNetwork :: Route a => Network a -> [Site] -> Network a
+subNetwork net ss = net { routes = new_routes }
+  where
+    directly_involved_routes = filter (any (`elem` ss) . sites) (routes net)
+    new_routes = filter (crossesAnyRoute directly_involved_routes) (routes net)
+    crossesAnyRoute rs r = any (crossesRoute r) rs
 
 tnFromPn :: PN -> TN
 tnFromPn pn = snd $ until pred buildup (pn, routelessNet (distances pn) :: TN)
@@ -292,9 +295,11 @@ tnFromPn pn = snd $ until pred buildup (pn, routelessNet (distances pn) :: TN)
         (pruned_pn, effectedRoute, seg) = pruneLeafPRoute pn
         new_tn = addRequiredTruckLoads tn (prSites effectedRoute) seg (requiredPallets pn seg)
 
+
+
 type Demand = V.Vector NPallets
 
-createInitialState :: Demand -> DistanceMatrix Float -> PN
+createInitialState :: Demand -> DistanceMatrix -> PN
 createInitialState dem distMat =
   if 1 + V.length dem <= M.cols distMat then
     MkNetwork { routes = rs, distances = distMat }

@@ -51,7 +51,7 @@ pos n = take n $ randomRs (Position (-100) 100, Position 100 100) (mkStdGen 1231
 distf :: Floating a => (a, a) -> (a, a) -> a
 distf (x1, y1) (x2, y2) = sqrt $ (x1-x2)^2 + (y1-y2)^2
 
-distanceMat :: [Position] -> DistanceMatrix Float
+distanceMat :: [Position] -> DistanceMatrix
 distanceMat poss = M.fromList (l, l) (distf <$> pos <*> pos) where
   pos = zip (x <$> poss) (y <$> poss)
   l = length poss

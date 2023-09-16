@@ -28,23 +28,20 @@ library
                       Heumilk.Network
                       Heumilk.Fitness
                       Heumilk.Nat
-                      NetworkPlot
 
     -- Modules included in this library but not exported.
     -- other-modules:
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
-    build-depends:    base ^>=4.16.4.0,
-                      --unordered-containers ^>=0.2.19.1,
-                      MissingH ^>= 1.6.0.0,
-                      graphite ^>= 0.10.0.0,
-                      safe ^>= 0.3.19,
-                      containers ^>= 0.6.5.1,
+    build-depends:    base >= 4.16.4.0,
+                      MissingH >= 1.6.0.0,
+                      safe >= 0.3.19,
+                      containers >= 0.6.5.1,
                       QuickCheck,
-                      extra ^>= 1.7.14,
-                      vector ^>= 0.13.0,
-                      matrices ^>= 0.5.0,
+                      extra >= 1.7.14,
+                      vector >= 0.13.0,
+                      matrices >= 0.5.0,
                       random >= 1.2.1
     hs-source-dirs:   src
     default-language: Haskell2010
@@ -58,9 +55,9 @@ executable heumilk
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
     build-depends:
-        base ^>=4.16.4.0,
+        base >=4.16.4.0,
         heumilk,
-        graphite ^>= 0.10.0.0
+        graphite >= 0.10.0.0
 
     hs-source-dirs:   app
     default-language: Haskell2010
@@ -71,9 +68,9 @@ test-suite test
     hs-source-dirs: tests
     main-is: test.hs
     build-depends:
-        base ^>=4.16.4.0,
+        base >= 4.16.4.0,
         tasty >= 1.4.3,
         tasty-hunit >= 0.10.0.3,
         tasty-quickcheck >= 0.10.2,
-        matrices ^>= 0.5.0,
+        matrices >= 0.5.0,
         heumilk
