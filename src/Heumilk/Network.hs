@@ -4,7 +4,7 @@ module Heumilk.Network where
 -- import Debug.Trace
 
 import qualified Data.List as L
-import Data.List.Extra ( disjoint )
+import Data.List.Extra ( disjoint, maximumOn )
 import qualified Data.Matrix.Unboxed as M
 import qualified Data.Vector as V
 import qualified Data.Bifunctor
@@ -190,7 +190,8 @@ addNewTruckCycles tn sites n = iterate (addNewTruckCycle sites) tn ! n
 requiredPallets :: PN -> TransportSegment -> NPallets
 requiredPallets pn seg = sum $ pallets <$> filter pred (routes pn)
   where
-    pred r = seg `L.elem` segments r
+    pred r = [fst seg, snd seg] `L.isSubsequenceOf` sites r
+    -- pred r = seg `L.elem` segments r
 
 trucksOnSegment :: TN -> TransportSegment -> [TruckCycle]
 trucksOnSegment tn seg = filter (\ x -> seg `elem` segments x) (routes tn)
