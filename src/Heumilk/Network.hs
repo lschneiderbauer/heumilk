@@ -161,8 +161,11 @@ pruneLeafPRoute ::  Network PalletRoute ->  ( Network PalletRoute  -- pruned net
                                             , TransportSegment )   -- segment that needed to be removed
 pruneLeafPRoute net = (replacePRoute net lr maybePrunedRoute, lr, seg)
   where
-    lr = head $ leafRoutes net
+    -- lr = head $ leafRoutes net
+    -- we might just assume that the longest route is a leafroute?
+    lr = maximumOn (length . prSites) (routes net)
     (maybePrunedRoute, seg) = prune lr
+
 
 
 
