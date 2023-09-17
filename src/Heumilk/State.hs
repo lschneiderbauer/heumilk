@@ -3,14 +3,19 @@ module Heumilk.State where
 
 import Heumilk.Network
 
-import Data.Maybe
 import Test.QuickCheck
+    ( Arbitrary(arbitrary),
+      choose,
+      chooseInt,
+      elements,
+      vectorOf,
+      Gen )
 
 import System.Random
+    ( Random(randomRs, random, randomR), mkStdGen )
 
 import qualified Data.Vector as V
 import qualified Data.Matrix.Unboxed as M
-import qualified Data.Bifunctor
 
 siteList n = Origin : (Site <$> [1..n])
 
@@ -36,17 +41,18 @@ instance Random Position where
 instance Arbitrary PN where
   arbitrary = do
     n_sites <- chooseInt (1, 10)
-    demands <- vectorOf n_sites $ chooseInt (0, 33)
+    demands <- vectorOf n_sites $ chooseInt (1, 10)
     site_positions <- vectorOf (n_sites + 1) (arbitrary :: (Gen Position))
     return $ createInitialState (V.fromList $ fromIntegral <$> demands) (distanceMat site_positions)
 
-demand :: Int -> Demand
-demand n_sites = V.fromList $ take n_sites $ fromIntegral <$> randomRs (0 :: Int , 33) (mkStdGen 123123)
+rdDemand :: Int -> Int -> Demand
+rdDemand seed n_sites =
+  V.fromList $ take n_sites $ fromIntegral <$> randomRs (1 :: Int , 10) (mkStdGen seed)
 
 
 -- just to help creating the distance matrix
-pos :: Int -> [Position]
-pos n = take n $ randomRs (Position (-100) 100, Position 100 100) (mkStdGen 123123)
+rdPos :: Int -> Int -> [Position]
+rdPos seed n = take n $ randomRs (Position (-100) 100, Position 100 100) (mkStdGen seed)
 
 distf :: Floating a => (a, a) -> (a, a) -> a
 distf (x1, y1) (x2, y2) = sqrt $ (x1-x2)^2 + (y1-y2)^2
@@ -56,17 +62,17 @@ distanceMat poss = M.fromList (l, l) (distf <$> pos <*> pos) where
   pos = zip (x <$> poss) (y <$> poss)
   l = length poss
 
-initialState :: Int -> PN
-initialState n = createInitialState (demand n) (distanceMat $ pos (n+1))
+rdInitialState :: Int -> Int -> PN
+rdInitialState seed n = createInitialState (rdDemand seed n) (distanceMat $ rdPos seed (n+1))
 
-{- 
-initialState = netFromList $ directRoute <$> filter demandExists siteList
+type Demand = V.Vector NPallets
+
+createInitialState :: Demand -> DistanceMatrix -> PN
+createInitialState dem distMat =
+  if 1 + V.length dem <= M.cols distMat then
+    MkNetwork { routes = rs, distances = distMat }
+  else
+    error "The given distance matrix is not covering all sites with demands."
   where
-    directRoute site = MkPalletRoute [site] (demand site)
-    demandExists site = demand site > 0
-
-sampleState =
-  netFromList
-    [ MkPalletRoute [Site 3, Site 2, Site 1] 20
-    , MkPalletRoute [Site 2, Site 1] 20
-    ] -}
+    rs = V.toList $ V.imap to_pr (V.drop 0 dem)
+    to_pr i dem = MkPalletRoute {prSites = [Site (i+1)], pallets = dem }

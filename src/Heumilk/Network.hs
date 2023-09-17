@@ -1,15 +1,12 @@
 {-# LANGUAGE InstanceSigs, FlexibleInstances #-}
 module Heumilk.Network where
-import Heumilk.Nat
 
 -- import Debug.Trace
 
 import qualified Data.List as L
-import Data.List.Extra
+import Data.List.Extra ( disjoint )
 import qualified Data.Matrix.Unboxed as M
 import qualified Data.Vector as V
-import Control.Monad
-import Data.Maybe
 import qualified Data.Bifunctor
 
 type NPallets = Float
@@ -104,18 +101,6 @@ instance Semigroup PalletRoute where -- not commutative!
 segsFromList :: Eq a => [a] -> [(a, a)]
 segsFromList = zip <*> tail
 
-class Measurable a where
-  cost :: a -> Float
-
-instance Measurable TN where
-  cost tn = sum $ tc_cost <$> routes tn
-    where
-      tc_cost tc = sum $ ts_cost <$> segments tc
-      ts_cost = uncurry (distance $ distances tn)
-
-
-instance Measurable PN where
-  cost = cost . tnFromPn
 
 type DistanceMatrix = M.Matrix Float
 distance :: DistanceMatrix -> Site -> Site -> Float
@@ -140,13 +125,6 @@ instance Route a => Eq (Network a) where
 
 setequal :: Eq a => [a] -> [a] -> Bool
 setequal xs ys = null (xs L.\\ ys) && null (ys L.\\ xs)
-
-instance Ord TN where
-  compare net1 net2 = cost net1 `compare` cost net2
-
-instance Ord PN where
-  compare :: PN -> PN -> Ordering
-  compare net1 net2 = cost net1 `compare` cost net2
 
 
 -- replace every route that equals a given route 
@@ -295,16 +273,3 @@ tnFromPn pn = snd $ until pred buildup (pn, routelessNet (distances pn) :: TN)
         (pruned_pn, effectedRoute, seg) = pruneLeafPRoute pn
         new_tn = addRequiredTruckLoads tn (prSites effectedRoute) seg (requiredPallets pn seg)
 
-
-
-type Demand = V.Vector NPallets
-
-createInitialState :: Demand -> DistanceMatrix -> PN
-createInitialState dem distMat =
-  if 1 + V.length dem <= M.cols distMat then
-    MkNetwork { routes = rs, distances = distMat }
-  else
-    error "The given distance matrix is not covering all sites with demands."
-  where
-    rs = V.toList $ V.imap to_pr (V.drop 0 dem)
-    to_pr i dem = MkPalletRoute {prSites = [Site (i+1)], pallets = dem }

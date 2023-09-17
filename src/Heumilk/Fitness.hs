@@ -1,27 +1,38 @@
+{-# LANGUAGE FlexibleInstances #-}
+
 module Heumilk.Fitness where
 
-import Data.Function
-import Data.List
+import Data.Function ( (&) )
+import Data.List ( elemIndex, nubBy, sortOn, union )
 import Data.List.Extra
-import qualified Data.Matrix.Unboxed as M
-import Heumilk.Nat
-import Heumilk.Network
-import Data.Maybe
+    ( elemIndex, nubBy, sortOn, union, disjoint, minimumOn )
 
-import Debug.Trace
+import Heumilk.Network
 
 (|>) = (&)
 infixl 3 |>
+
+
+class Measurable a where
+  cost :: a -> Float
+
+instance Measurable TN where
+  cost tn = sum $ tc_cost <$> routes tn
+    where
+      tc_cost tc = sum $ ts_cost <$> segments tc
+      ts_cost = uncurry (distance $ distances tn)
+
+
+instance Measurable PN where
+  cost = cost . tnFromPn
+
 {-
-data OrdSite a = OrdSite (Network a) Site deriving (Eq)
+instance Ord TN where
+  compare net1 net2 = cost net1 `compare` cost net2
 
-instance Route a => Show (OrdSite a) where
-  show (OrdSite net s) = show s
-
-instance Route a => Ord (OrdSite a) where
-  compare (OrdSite net1 s1) (OrdSite net2 s2)
-    | net1 == net2  = distance net1 Origin s1 `compare` distance net2 Origin s2
-    | otherwise     = undefined -- Ord only makes sense within the same Network
+instance Ord PN where
+  compare :: PN -> PN -> Ordering
+  compare net1 net2 = cost net1 `compare` cost net2
 -}
 
 -- we are using here that Data.Set uses an ordering defined by Ord
