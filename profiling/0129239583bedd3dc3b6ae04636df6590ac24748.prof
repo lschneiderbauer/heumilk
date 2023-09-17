@@ -1,0 +1,228 @@
+	Commit - 0129239583bedd3dc3b6ae04636df6590ac24748
+  Profiling `optimize1 (rdInitialState 123123 50)`
+--------------------------------------------------------------
+  
+  Sun Sep 17 17:23 2023 Time and Allocation Profiling Report  (Final)
+
+	   exe +RTS -p -RTS
+
+	total time  =        2.39 secs   (2387 ticks @ 1000 us, 1 processor)
+	total alloc = 2,247,636,760 bytes  (excludes profiling overheads)
+
+COST CENTRE           MODULE          SRC                                       %time %alloc
+
+requiredPallets       Heumilk.Network src/Heumilk/Network.hs:(194,1)-(196,59)    18.9   15.6
+hasAny                Data.List.Utils src/Data/List/Utils.hs:(122,1)-(124,73)    16.3    0.0
+==                    Heumilk.Network src/Heumilk/Network.hs:18:41-42            13.7    0.0
+trucksOnSegment       Heumilk.Network src/Heumilk/Network.hs:200:1-74             8.5    1.3
+subNetwork            Heumilk.Network src/Heumilk/Network.hs:(263,1)-(267,50)     7.6    2.2
+sites                 Heumilk.Network src/Heumilk/Network.hs:83:3-45              6.0   24.6
+addRequiredTruckLoads Heumilk.Network src/Heumilk/Network.hs:(227,1)-(251,100)    3.1    4.7
+segsFromList          Heumilk.Network src/Heumilk/Network.hs:105:1-27             2.8   18.8
+tnFromPn              Heumilk.Network src/Heumilk/Network.hs:(270,1)-(281,94)     2.6    5.9
+maximumOn             Data.List.Extra src/Data/List/Extra.hs:(470,1)-(476,26)     2.6    0.0
+==                    Heumilk.Network src/Heumilk/Network.hs:77:3-43              2.5    0.0
+crossesRoute          Heumilk.Network src/Heumilk/Network.hs:88:3-59              2.0    2.4
+sites                 Heumilk.Network src/Heumilk/Network.hs:55:3-44              1.8   10.0
+pruneLeafPRoute       Heumilk.Network src/Heumilk/Network.hs:(165,1)-(170,38)     1.6    5.4
+replacePRoute         Heumilk.Network src/Heumilk/Network.hs:(139,1)-(142,48)     1.4    2.5
+prSites               Heumilk.Network src/Heumilk/Network.hs:74:35-41             1.3    0.0
+segments              Heumilk.Network src/Heumilk/Network.hs:61:3-33              1.2    2.4
+
+
+                                                                                                                                         individual      inherited
+COST CENTRE                  MODULE                            SRC                                                    no.     entries  %time %alloc   %time %alloc
+
+MAIN                         MAIN                              <built-in>                                             236           0    0.0    0.0   100.0  100.0
+ CAF                         Main                              <entire-module>                                        471           0    0.0    0.0   100.0  100.0
+  main                       Main                              exe/Main.hs:7:1-51                                     472           1    0.0    0.0   100.0  100.0
+   optimize1                 Heumilk.Fitness                   src/Heumilk/Fitness.hs:(112,1)-(125,77)                514           4    0.3    0.4    99.9   99.9
+    disjoint                 Data.List.Extra                   src/Data/List/Extra.hs:86:1-33                         615       18077    0.0    0.2     0.0    0.2
+     ==                      Heumilk.Network                   src/Heumilk/Network.hs:18:41-42                        616       68075    0.0    0.0     0.0    0.0
+    saving                   Heumilk.Fitness                   src/Heumilk/Fitness.hs:(90,1)-(95,36)                  521       12858    0.0    0.1    99.2   99.3
+     ==                      Heumilk.Network                   src/Heumilk/Network.hs:18:41-42                        522       12858    0.0    0.0     0.0    0.0
+     netMod                  Heumilk.Fitness                   src/Heumilk/Fitness.hs:(98,1)-(108,17)                 585       12658    0.3    0.2     1.6    0.6
+      crossesRoute           Heumilk.Network                   src/Heumilk/Network.hs:88:3-59                         594       26486    0.0    0.0     0.2    0.0
+       prSites               Heumilk.Network                   src/Heumilk/Network.hs:74:35-41                        595       52972    0.0    0.0     0.0    0.0
+       hasAny                Data.List.Utils                   src/Data/List/Utils.hs:(122,1)-(124,73)                596       52541    0.2    0.0     0.2    0.0
+        ==                   Heumilk.Network                   src/Heumilk/Network.hs:18:41-42                        597      125002    0.0    0.0     0.0    0.0
+      ==                     Heumilk.Network                   src/Heumilk/Network.hs:18:41-42                        599       13134    0.0    0.0     0.0    0.0
+      prSites                Heumilk.Network                   src/Heumilk/Network.hs:74:35-41                        598       13134    0.0    0.0     0.0    0.0
+      leafRouteWithSite      Heumilk.Network                   src/Heumilk/Network.hs:(151,1)-(154,20)                586       12658    0.1    0.1     1.0    0.3
+       ==                    Heumilk.Network                   src/Heumilk/Network.hs:18:41-42                        592       21151    0.0    0.0     0.0    0.0
+       sites                 Heumilk.Network                   src/Heumilk/Network.hs:83:3-45                         591       21151    0.0    0.1     0.0    0.1
+       leafRoutes            Heumilk.Network                   src/Heumilk/Network.hs:(147,1)-(148,63)                587       12658    0.3    0.2     0.9    0.2
+        crossesSite          Heumilk.Network                   src/Heumilk/Network.hs:86:3-53                         589      212684    0.4    0.0     0.6    0.0
+         ==                  Heumilk.Network                   src/Heumilk/Network.hs:18:41-42                        644      569493    0.2    0.0     0.2    0.0
+         prSites             Heumilk.Network                   src/Heumilk/Network.hs:74:35-41                        590      212684    0.0    0.0     0.0    0.0
+        routes               Heumilk.Network                   src/Heumilk/Network.hs:116:41-46                       588       70179    0.0    0.0     0.0    0.0
+        dest                 Heumilk.Network                   src/Heumilk/Network.hs:85:3-23                         645           0    0.0    0.0     0.0    0.0
+         prSites             Heumilk.Network                   src/Heumilk/Network.hs:74:35-41                        646       50459    0.0    0.0     0.0    0.0
+      <>                     Heumilk.Network                   src/Heumilk/Network.hs:101:3-71                        605        8152    0.0    0.0     0.0    0.0
+       prSites               Heumilk.Network                   src/Heumilk/Network.hs:74:35-41                        606       16304    0.0    0.0     0.0    0.0
+       pallets               Heumilk.Network                   src/Heumilk/Network.hs:74:54-60                        607        8152    0.0    0.0     0.0    0.0
+      replacePRoute          Heumilk.Network                   src/Heumilk/Network.hs:(139,1)-(142,48)                600        8152    0.0    0.0     0.0    0.0
+       ==                    Heumilk.Network                   src/Heumilk/Network.hs:77:3-43                         602       22033    0.0    0.0     0.0    0.0
+        prSites              Heumilk.Network                   src/Heumilk/Network.hs:74:35-41                        603       44066    0.0    0.0     0.0    0.0
+        ==                   Heumilk.Network                   src/Heumilk/Network.hs:18:41-42                        604       25359    0.0    0.0     0.0    0.0
+       routes                Heumilk.Network                   src/Heumilk/Network.hs:116:41-46                       601        8152    0.0    0.0     0.0    0.0
+      routes                 Heumilk.Network                   src/Heumilk/Network.hs:116:41-46                       593        7562    0.0    0.0     0.0    0.0
+     subNetwork              Heumilk.Network                   src/Heumilk/Network.hs:(263,1)-(267,50)                531       12658    7.6    2.2    34.4    7.5
+      ==                     Heumilk.Network                   src/Heumilk/Network.hs:18:41-42                        534     3529286    1.2    0.0     1.2    0.0
+      crossesRoute           Heumilk.Network                   src/Heumilk/Network.hs:88:3-59                         535     2186440    1.9    2.3    24.8    2.3
+       hasAny                Data.List.Utils                   src/Data/List/Utils.hs:(122,1)-(124,73)                537     8685130   16.1    0.0    22.5    0.0
+        ==                   Heumilk.Network                   src/Heumilk/Network.hs:18:41-42                        538    19539923    6.4    0.0     6.4    0.0
+       prSites               Heumilk.Network                   src/Heumilk/Network.hs:74:35-41                        536     4372880    0.3    0.0     0.3    0.0
+      sites                  Heumilk.Network                   src/Heumilk/Network.hs:83:3-45                         533      632900    0.8    3.0     0.8    3.0
+      routes                 Heumilk.Network                   src/Heumilk/Network.hs:116:41-46                       532       25316    0.0    0.0     0.0    0.0
+     cost                    Heumilk.Fitness                   src/Heumilk/Fitness.hs:27:3-24                         525           0    0.1    0.0    63.2   91.2
+      cost                   Heumilk.Fitness                   src/Heumilk/Fitness.hs:(20,3)-(23,49)                  574       25316    0.5    0.9     1.2    2.5
+       distance              Heumilk.Network                   src/Heumilk/Network.hs:(110,1)-(113,45)                582      190213    0.1    0.2     0.3    0.3
+        !                    Data.Matrix.Unboxed               src/Data/Matrix/Unboxed.hs:126:1-12                    583      190213    0.2    0.1     0.2    0.1
+         unBox               Data.Stream.Monadic               src/Data/Stream/Monadic.hs:123:20-24                   584      190213    0.0    0.0     0.0    0.0
+       distances             Heumilk.Network                   src/Heumilk/Network.hs:117:43-51                       580       25316    0.0    0.0     0.0    0.0
+       routes                Heumilk.Network                   src/Heumilk/Network.hs:116:41-46                       575       25316    0.0    0.0     0.0    0.0
+       segments              Heumilk.Network                   src/Heumilk/Network.hs:61:3-33                         576           0    0.1    0.1     0.5    1.2
+        sites                Heumilk.Network                   src/Heumilk/Network.hs:55:3-44                         578       45162    0.1    0.4     0.2    0.4
+         tcSites             Heumilk.Network                   src/Heumilk/Network.hs:48:34-40                        579       45162    0.0    0.0     0.0    0.0
+        segsFromList         Heumilk.Network                   src/Heumilk/Network.hs:105:1-27                        577           0    0.2    0.7     0.2    0.7
+      tnFromPn               Heumilk.Network                   src/Heumilk/Network.hs:(270,1)-(281,94)                526       25316    2.6    5.9    61.9   88.6
+       addRequiredTruckLoads Heumilk.Network                   src/Heumilk/Network.hs:(227,1)-(251,100)               558      419244    3.1    4.7    20.3   35.0
+        trucksOnSegment      Heumilk.Network                   src/Heumilk/Network.hs:200:1-74                        559      419244    8.5    1.3    15.6   29.3
+         ==                  Heumilk.Network                   src/Heumilk/Network.hs:18:41-42                        571     4709778    1.8    0.0     1.8    0.0
+         routes              Heumilk.Network                   src/Heumilk/Network.hs:116:41-46                       560      419244    0.0    0.0     0.0    0.0
+         segments            Heumilk.Network                   src/Heumilk/Network.hs:61:3-33                         565           0    1.1    2.3     5.4   28.0
+          sites              Heumilk.Network                   src/Heumilk/Network.hs:55:3-44                         568      713539    1.7    9.6     1.8    9.6
+           tcSites           Heumilk.Network                   src/Heumilk/Network.hs:48:34-40                        569      713539    0.1    0.0     0.1    0.0
+          segsFromList       Heumilk.Network                   src/Heumilk/Network.hs:105:1-27                        567           0    2.5   16.1     2.5   16.1
+        initialLoad          Heumilk.Network                   src/Heumilk/Network.hs:48:53-63                        608      390685    0.0    0.0     0.0    0.0
+        dropTruckCycles      Heumilk.Network                   src/Heumilk/Network.hs:(214,1)-(217,39)                561      242961    0.3    0.3     1.0    0.3
+         ==                  Heumilk.Network                   src/Heumilk/Network.hs:49:12-13                        612      103955    0.6    0.0     0.7    0.0
+          ==                 Heumilk.Network                   src/Heumilk/Network.hs:18:41-42                        613      558308    0.1    0.0     0.1    0.0
+         routes              Heumilk.Network                   src/Heumilk/Network.hs:116:41-46                       611       99889    0.0    0.0     0.0    0.0
+        addTrucks            Heumilk.Network                   src/Heumilk/Network.hs:(221,1)-(224,100)               562      143072    0.0    0.0     0.0    0.0
+         routes              Heumilk.Network                   src/Heumilk/Network.hs:116:41-46                       572       45162    0.0    0.0     0.0    0.0
+        routes               Heumilk.Network                   src/Heumilk/Network.hs:116:41-46                       573      143072    0.0    0.0     0.0    0.0
+        consumeTruckLoad     Heumilk.Network                   src/Heumilk/Network.hs:(208,1)-(211,62)                609       99542    0.5    0.7     0.5    0.7
+         initialLoad         Heumilk.Network                   src/Heumilk/Network.hs:48:53-63                        610      199084    0.0    0.0     0.0    0.0
+       isRouteless           Heumilk.Network                   src/Heumilk/Network.hs:258:1-27                        529      419244    0.5    0.0     0.5    0.0
+        routes               Heumilk.Network                   src/Heumilk/Network.hs:116:41-46                       530      863804    0.0    0.0     0.0    0.0
+       pruneLeafPRoute       Heumilk.Network                   src/Heumilk/Network.hs:(165,1)-(170,38)                539      419244    1.6    5.4    11.1   12.2
+        maximumOn            Data.List.Extra                   src/Data/List/Extra.hs:(470,1)-(476,26)                543      419244    2.6    0.0     3.2    0.0
+         prSites             Heumilk.Network                   src/Heumilk/Network.hs:74:35-41                        544     3896516    0.6    0.0     0.6    0.0
+        prune                Heumilk.Network                   src/Heumilk/Network.hs:(94,3)-(98,59)                  540      419244    0.8    0.8     1.6    4.5
+         segments            Heumilk.Network                   src/Heumilk/Network.hs:90:3-39                         554      419244    0.3    0.0     0.7    3.7
+          segsFromList       Heumilk.Network                   src/Heumilk/Network.hs:105:1-27                        556      419244    0.1    1.9     0.1    1.9
+          sites              Heumilk.Network                   src/Heumilk/Network.hs:83:3-45                         555      419244    0.4    1.7     0.4    1.7
+        replacePRoute        Heumilk.Network                   src/Heumilk/Network.hs:(139,1)-(142,48)                541      419244    1.3    2.4     4.7    2.4
+         ==                  Heumilk.Network                   src/Heumilk/Network.hs:77:3-43                         546     1267440    2.5    0.0     3.4    0.0
+          prSites            Heumilk.Network                   src/Heumilk/Network.hs:74:35-41                        547     2534880    0.4    0.0     0.4    0.0
+          ==                 Heumilk.Network                   src/Heumilk/Network.hs:18:41-42                        548     1964380    0.5    0.0     0.5    0.0
+         routes              Heumilk.Network                   src/Heumilk/Network.hs:116:41-46                       545      419244    0.0    0.0     0.0    0.0
+        routes               Heumilk.Network                   src/Heumilk/Network.hs:116:41-46                       542      419244    0.0    0.0     0.0    0.0
+       requiredPallets       Heumilk.Network                   src/Heumilk/Network.hs:(194,1)-(196,59)                550      419244   18.9   15.6    27.3   35.5
+        ==                   Heumilk.Network                   src/Heumilk/Network.hs:18:41-42                        553    11198160    3.3    0.0     3.3    0.0
+        sites                Heumilk.Network                   src/Heumilk/Network.hs:83:3-45                         552     3921832    4.7   19.9     4.7   19.9
+        pallets              Heumilk.Network                   src/Heumilk/Network.hs:74:54-60                        557     1116184    0.3    0.0     0.3    0.0
+        routes               Heumilk.Network                   src/Heumilk/Network.hs:116:41-46                       551      419244    0.0    0.0     0.0    0.0
+       prSites               Heumilk.Network                   src/Heumilk/Network.hs:74:35-41                        570       45162    0.0    0.0     0.0    0.0
+       distances             Heumilk.Network                   src/Heumilk/Network.hs:117:43-51                       581       25316    0.0    0.0     0.0    0.0
+       routelessNet          Heumilk.Network                   src/Heumilk/Network.hs:255:1-27                        549       25316    0.0    0.0     0.0    0.0
+    netMod                   Heumilk.Fitness                   src/Heumilk/Fitness.hs:(98,1)-(108,17)                 617          58    0.0    0.0     0.1    0.0
+     crossesRoute            Heumilk.Network                   src/Heumilk/Network.hs:88:3-59                         626        2900    0.0    0.0     0.0    0.0
+      hasAny                 Data.List.Utils                   src/Data/List/Utils.hs:(122,1)-(124,73)                628        7884    0.0    0.0     0.0    0.0
+       ==                    Heumilk.Network                   src/Heumilk/Network.hs:18:41-42                        629       15154    0.0    0.0     0.0    0.0
+      prSites                Heumilk.Network                   src/Heumilk/Network.hs:74:35-41                        627        5800    0.0    0.0     0.0    0.0
+     ==                      Heumilk.Network                   src/Heumilk/Network.hs:18:41-42                        631        2755    0.0    0.0     0.0    0.0
+     prSites                 Heumilk.Network                   src/Heumilk/Network.hs:74:35-41                        630        2755    0.0    0.0     0.0    0.0
+     <>                      Heumilk.Network                   src/Heumilk/Network.hs:101:3-71                        633          69    0.0    0.0     0.0    0.0
+      prSites                Heumilk.Network                   src/Heumilk/Network.hs:74:35-41                        634         138    0.0    0.0     0.0    0.0
+      pallets                Heumilk.Network                   src/Heumilk/Network.hs:74:54-60                        643          69    0.0    0.0     0.0    0.0
+     replacePRoute           Heumilk.Network                   src/Heumilk/Network.hs:(139,1)-(142,48)                632          69    0.0    0.0     0.0    0.0
+      ==                     Heumilk.Network                   src/Heumilk/Network.hs:77:3-43                         640        2373    0.0    0.0     0.0    0.0
+       prSites               Heumilk.Network                   src/Heumilk/Network.hs:74:35-41                        641        4746    0.0    0.0     0.0    0.0
+       ==                    Heumilk.Network                   src/Heumilk/Network.hs:18:41-42                        642        2415    0.0    0.0     0.0    0.0
+      routes                 Heumilk.Network                   src/Heumilk/Network.hs:116:41-46                       639          69    0.0    0.0     0.0    0.0
+     leafRouteWithSite       Heumilk.Network                   src/Heumilk/Network.hs:(151,1)-(154,20)                618          58    0.0    0.0     0.1    0.0
+      ==                     Heumilk.Network                   src/Heumilk/Network.hs:18:41-42                        624         853    0.0    0.0     0.0    0.0
+      sites                  Heumilk.Network                   src/Heumilk/Network.hs:83:3-45                         623         853    0.0    0.0     0.0    0.0
+      leafRoutes             Heumilk.Network                   src/Heumilk/Network.hs:(147,1)-(148,63)                619          58    0.0    0.0     0.0    0.0
+       crossesSite           Heumilk.Network                   src/Heumilk/Network.hs:86:3-53                         621       44763    0.0    0.0     0.0    0.0
+        prSites              Heumilk.Network                   src/Heumilk/Network.hs:74:35-41                        622       44763    0.0    0.0     0.0    0.0
+        ==                   Heumilk.Network                   src/Heumilk/Network.hs:18:41-42                        635       25673    0.0    0.0     0.0    0.0
+       routes                Heumilk.Network                   src/Heumilk/Network.hs:116:41-46                       620        1174    0.0    0.0     0.0    0.0
+       dest                  Heumilk.Network                   src/Heumilk/Network.hs:85:3-23                         637           0    0.0    0.0     0.0    0.0
+        prSites              Heumilk.Network                   src/Heumilk/Network.hs:74:35-41                        638        1077    0.0    0.0     0.0    0.0
+     routes                  Heumilk.Network                   src/Heumilk/Network.hs:116:41-46                       625          58    0.0    0.0     0.0    0.0
+    netSites                 Heumilk.Fitness                   src/Heumilk/Fitness.hs:40:1-54                         516           4    0.1    0.0     0.3    0.0
+     ==                      Heumilk.Network                   src/Heumilk/Network.hs:18:41-42                        523       86108    0.2    0.0     0.2    0.0
+     prSites                 Heumilk.Network                   src/Heumilk/Network.hs:74:35-41                        520         200    0.0    0.0     0.0    0.0
+     routes                  Heumilk.Network                   src/Heumilk/Network.hs:116:41-46                       517           4    0.0    0.0     0.0    0.0
+   rdInitialState            Heumilk.State                     src/Heumilk/State.hs:66:1-93                           476           1    0.0    0.0     0.0    0.0
+    createInitialState       Heumilk.State                     src/Heumilk/State.hs:(71,1)-(78,72)                    511           1    0.0    0.0     0.0    0.0
+     unId                    Data.Vector.Fusion.Util           src/Data/Vector/Fusion/Util.hs:25:21-24                512          53    0.0    0.0     0.0    0.0
+     array#                  Data.Primitive.Array              Data/Primitive/Array.hs:69:5-10                        519          50    0.0    0.0     0.0    0.0
+     cols                    Data.Matrix.Unboxed               src/Data/Matrix/Unboxed.hs:120:1-14                    513           1    0.0    0.0     0.0    0.0
+     sElems                  Data.Vector.Fusion.Bundle.Monadic src/Data/Vector/Fusion/Bundle/Monadic.hs:129:30-35     518           1    0.0    0.0     0.0    0.0
+    distanceMat              Heumilk.State                     src/Heumilk/State.hs:(61,1)-(63,17)                    488           1    0.0    0.0     0.0    0.0
+     unId                    Data.Vector.Fusion.Util           src/Data/Vector/Fusion/Util.hs:25:21-24                500        2602    0.0    0.0     0.0    0.0
+     distf                   Heumilk.State                     src/Heumilk/State.hs:58:1-54                           502        2601    0.0    0.0     0.0    0.0
+     x                       Heumilk.State                     src/Heumilk/State.hs:25:28                             503          51    0.0    0.0     0.0    0.0
+     y                       Heumilk.State                     src/Heumilk/State.hs:25:40                             509          51    0.0    0.0     0.0    0.0
+     sizeOf                  Data.Primitive.Types              Data/Primitive/Types.hs:128:1-25                       501          13    0.0    0.0     0.0    0.0
+     fromList                Data.Matrix.Unboxed               src/Data/Matrix/Unboxed.hs:148:1-22                    491           0    0.0    0.0     0.0    0.0
+      sChunks                Data.Vector.Fusion.Bundle.Monadic src/Data/Vector/Fusion/Bundle/Monadic.hs:130:30-36     499           1    0.0    0.0     0.0    0.0
+      sSize                  Data.Vector.Fusion.Bundle.Monadic src/Data/Vector/Fusion/Bundle/Monadic.hs:132:30-34     496           1    0.0    0.0     0.0    0.0
+      unId                   Data.Vector.Fusion.Util           src/Data/Vector/Fusion/Util.hs:25:21-24                494           1    0.0    0.0     0.0    0.0
+      upperBound             Data.Vector.Fusion.Bundle.Size    src/Data/Vector/Fusion/Bundle/Size.hs:(129,1)-(131,30) 495           1    0.0    0.0     0.0    0.0
+    rdDemand                 Heumilk.State                     src/Heumilk/State.hs:(49,1)-(50,87)                    477           1    0.0    0.0     0.0    0.0
+     nextWord64              System.Random.SplitMix            src/System/Random/SplitMix.hs:(121,1)-(123,29)         485          82    0.0    0.0     0.0    0.0
+     marray#                 Data.Primitive.Array              Data/Primitive/Array.hs:112:5-11                       487          51    0.0    0.0     0.0    0.0
+     unId                    Data.Vector.Fusion.Util           src/Data/Vector/Fusion/Util.hs:25:21-24                484          51    0.0    0.0     0.0    0.0
+     sChunks                 Data.Vector.Fusion.Bundle.Monadic src/Data/Vector/Fusion/Bundle/Monadic.hs:130:30-36     480           1    0.0    0.0     0.0    0.0
+     sSize                   Data.Vector.Fusion.Bundle.Monadic src/Data/Vector/Fusion/Bundle/Monadic.hs:132:30-34     479           1    0.0    0.0     0.0    0.0
+     upperBound              Data.Vector.Fusion.Bundle.Size    src/Data/Vector/Fusion/Bundle/Size.hs:(129,1)-(131,30) 478           1    0.0    0.0     0.0    0.0
+     mkStdGen                System.Random.Internal            src/System/Random/Internal.hs:583:1-45                 482           0    0.0    0.0     0.0    0.0
+      mkSMGen                System.Random.SplitMix            src/System/Random/SplitMix.hs:377:1-61                 483           1    0.0    0.0     0.0    0.0
+    rdPos                    Heumilk.State                     src/Heumilk/State.hs:55:1-88                           492           1    0.0    0.0     0.0    0.0
+     randomR                 Heumilk.State                     src/Heumilk/State.hs:(36,3)-(39,40)                    493          51    0.0    0.0     0.0    0.0
+      x                      Heumilk.State                     src/Heumilk/State.hs:25:28                             504         102    0.0    0.0     0.0    0.0
+      y                      Heumilk.State                     src/Heumilk/State.hs:25:40                             510         102    0.0    0.0     0.0    0.0
+      nextWord32             System.Random.SplitMix            src/System/Random/SplitMix.hs:(129,1)-(136,28)         505          51    0.0    0.0     0.0    0.0
+       nextWord64            System.Random.SplitMix            src/System/Random/SplitMix.hs:(121,1)-(123,29)         506          51    0.0    0.0     0.0    0.0
+     mkStdGen                System.Random.Internal            src/System/Random/Internal.hs:583:1-45                 507           0    0.0    0.0     0.0    0.0
+      mkSMGen                System.Random.SplitMix            src/System/Random/SplitMix.hs:377:1-61                 508           1    0.0    0.0     0.0    0.0
+   show                      Heumilk.Network                   src/Heumilk/Network.hs:124:3-42                        474           1    0.0    0.0     0.0    0.0
+    show                     Heumilk.Network                   src/Heumilk/Network.hs:80:3-59                         647          50    0.0    0.0     0.0    0.0
+     pallets                 Heumilk.Network                   src/Heumilk/Network.hs:74:54-60                        648          50    0.0    0.0     0.0    0.0
+     pp                      Heumilk.Network                   src/Heumilk/Network.hs:45:3-74                         649          50    0.0    0.0     0.0    0.0
+      show                   Heumilk.Network                   src/Heumilk/Network.hs:(21,3)-(22,31)                  651         245    0.0    0.0     0.0    0.0
+      sites                  Heumilk.Network                   src/Heumilk/Network.hs:83:3-45                         650          50    0.0    0.0     0.0    0.0
+    routes                   Heumilk.Network                   src/Heumilk/Network.hs:116:41-46                       475           1    0.0    0.0     0.0    0.0
+ CAF                         Heumilk.State                     <entire-module>                                        470           0    0.0    0.0     0.0    0.0
+  distanceMat                Heumilk.State                     src/Heumilk/State.hs:(61,1)-(63,17)                    489           0    0.0    0.0     0.0    0.0
+   fromList                  Data.Matrix.Unboxed               src/Data/Matrix/Unboxed.hs:148:1-22                    490           1    0.0    0.0     0.0    0.0
+  rdDemand                   Heumilk.State                     src/Heumilk/State.hs:(49,1)-(50,87)                    486           0    0.0    0.0     0.0    0.0
+ CAF                         Heumilk.Fitness                   <entire-module>                                        469           0    0.0    0.0     0.0    0.0
+  cost                       Heumilk.Fitness                   src/Heumilk/Fitness.hs:27:3-24                         524           1    0.0    0.0     0.0    0.0
+  |>                         Heumilk.Fitness                   src/Heumilk/Fitness.hs:12:1-10                         515           1    0.0    0.0     0.0    0.0
+ CAF                         Heumilk.Network                   <entire-module>                                        468           0    0.0    0.0     0.0    0.0
+  dest                       Heumilk.Network                   src/Heumilk/Network.hs:85:3-23                         636           1    0.0    0.0     0.0    0.0
+  segments                   Heumilk.Network                   src/Heumilk/Network.hs:61:3-33                         564           1    0.0    0.0     0.0    0.0
+   segsFromList              Heumilk.Network                   src/Heumilk/Network.hs:105:1-27                        566           1    0.0    0.0     0.0    0.0
+  truckCapacity              Heumilk.Network                   src/Heumilk/Network.hs:15:1-18                         563           1    0.0    0.0     0.0    0.0
+  tnFromPn                   Heumilk.Network                   src/Heumilk/Network.hs:(270,1)-(281,94)                527           0    0.0    0.0     0.0    0.0
+   isRouteless               Heumilk.Network                   src/Heumilk/Network.hs:258:1-27                        528           1    0.0    0.0     0.0    0.0
+ CAF                         Data.Vector.Unboxed.Base          <entire-module>                                        453           0    0.0    0.0     0.0    0.0
+  sizeOf                     Data.Primitive.Types              Data/Primitive/Types.hs:128:1-25                       497           1    0.0    0.0     0.0    0.0
+ CAF                         Data.Primitive.MachDeps           <entire-module>                                        445           0    0.0    0.0     0.0    0.0
+  sIZEOF_FLOAT               Data.Primitive.MachDeps           Data/Primitive/MachDeps.hs:80:1-16                     498           1    0.0    0.0     0.0    0.0
+ CAF                         System.Random.Internal            <entire-module>                                        434           0    0.0    0.0     0.0    0.0
+  mkStdGen                   System.Random.Internal            src/System/Random/Internal.hs:583:1-45                 481           1    0.0    0.0     0.0    0.0
+ CAF                         GHC.Conc.Signal                   <entire-module>                                        353           0    0.0    0.0     0.0    0.0
+ CAF                         GHC.Float                         <entire-module>                                        345           0    0.0    0.0     0.0    0.0
+ CAF                         GHC.IO.Encoding                   <entire-module>                                        337           0    0.0    0.0     0.0    0.0
+ CAF                         GHC.IO.Encoding.Iconv             <entire-module>                                        335           0    0.0    0.0     0.0    0.0
+ CAF                         GHC.IO.Handle.FD                  <entire-module>                                        327           0    0.0    0.0     0.0    0.0
+ CAF                         GHC.IO.Handle.Text                <entire-module>                                        325           0    0.0    0.0     0.0    0.0
+ main                        Main                              exe/Main.hs:7:1-51                                     473           0    0.0    0.0     0.0    0.0
