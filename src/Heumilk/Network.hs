@@ -4,7 +4,8 @@ module Heumilk.Network where
 -- import Debug.Trace
 
 import qualified Data.List as L
-import Data.List.Extra ( disjoint, maximumOn )
+import Data.List.Extra ( maximumOn )
+import Data.List.Utils ( hasAny )
 import qualified Data.Matrix.Unboxed as M
 import qualified Data.Vector as V
 import qualified Data.Bifunctor
@@ -55,7 +56,8 @@ instance Route TruckCycle where
   appendSite tc s = tc { tcSites = s : tcSites tc }
   dest _ = Origin -- dummy for now
   crossesSite tc site = site `elem` sites tc
-  crossesRoute tc1 tc2 = not $ disjoint (tcSites tc1) (tcSites tc2)
+  --crossesRoute tc1 tc2 = not $ disjoint (tcSites tc1) (tcSites tc2)
+  crossesRoute tc1 tc2 = hasAny (tcSites tc1) (tcSites tc2)
   segments = segsFromList . sites
   isSingleton tc = length (tcSites tc) == 1
   volume = initialLoad
@@ -82,7 +84,8 @@ instance Route PalletRoute where
   appendSite (MkPalletRoute ss n) s = MkPalletRoute (s:ss) n
   dest = head . prSites
   crossesSite pr site = site `elem` tail (prSites pr)
-  crossesRoute pr1 pr2 = not $ disjoint (prSites pr1) (prSites pr2)
+  --crossesRoute pr1 pr2 = not $ disjoint (prSites pr1) (prSites pr2)
+  crossesRoute pr1 pr2 = hasAny (prSites pr1) (prSites pr2)
   isSingleton pr = length (prSites pr) == 1
   segments pr = segsFromList (sites pr)
   (=|=) pr1 pr2 = prSites pr1 == prSites pr2
