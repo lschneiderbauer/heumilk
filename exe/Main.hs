@@ -4,4 +4,4 @@ import Heumilk.Fitness ( optimize1 )
 import Heumilk.State ( rdInitialState )
 
 main :: IO ()
-main = print $ optimize1 (rdInitialState 123123 30)
+main = print $ optimize1 (rdInitialState 123123 50)
