@@ -33,7 +33,7 @@ library
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
     build-depends:    base >= 4.16.4.0,
-                      -- MissingH >= 1.6.0.0,
+                      MissingH >= 1.6.0.0,
                       -- safe >= 0.3.19,
                       -- containers >= 0.6.5.1,
                       QuickCheck,
