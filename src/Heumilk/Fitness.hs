@@ -1,4 +1,6 @@
 {-# LANGUAGE FlexibleInstances #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Redundant $" #-}
 
 module Heumilk.Fitness where
 
@@ -6,8 +8,14 @@ import Data.Function ( (&) )
 import Data.List ( elemIndex, nubBy, sortOn, union )
 import Data.List.Extra
     ( elemIndex, nubBy, sortOn, union, disjoint, minimumOn )
+import Data.Foldable
+
+import qualified Data.Sequence as S
+import Data.Sequence ( Seq (..), (><) )
 
 import Heumilk.Network
+
+
 
 (|>) = (&)
 infixl 3 |>
@@ -37,7 +45,7 @@ instance Ord PN where
 
 -- we are using here that Data.Set uses an ordering defined by Ord
 netSites :: PN -> [Site]
-netSites net = foldr union [] (prSites <$> routes net)
+netSites net = foldr union [] (toList . prSites <$> routes net)
 
 nearestSingletonLeafRoute :: Route a => Network a -> Site -> Maybe a
 nearestSingletonLeafRoute net s
@@ -102,8 +110,15 @@ netMod pn site1 site2 =
         routesToAbsorb =
           routes pn |>
             filter (not . crossesRoute baseRoute) |>
-            filter (\r -> site2 == last (prSites r)) -- && notElem site1 (prSites r))
+            filter (flip isStart $ site2) -- && notElem site1 (prSites r))
         newRoutes = (baseRoute <>) <$> routesToAbsorb
+
+        -- the confusing naming comes from the fact that we originally
+        -- stored the lists of sites in reverse (head was "last" visit)
+        isStart pr site =
+          case prSites pr of
+            htail :|> last -> site == last
+            _ -> False
 
     Nothing -> pn
 

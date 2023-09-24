@@ -1,14 +1,17 @@
-{-# LANGUAGE InstanceSigs, FlexibleInstances #-}
+{-# LANGUAGE FlexibleInstances #-}
 module Heumilk.Network where
 
 -- import Debug.Trace
 
 import qualified Data.List as L
+import qualified Data.Sequence as S
+import Data.Sequence ( Seq (..), (><), (!?) )
 import Data.List.Extra ( maximumOn )
 import Data.List.Utils ( hasAny )
 import qualified Data.Matrix.Unboxed as M
 import qualified Data.Vector as V
 import qualified Data.Bifunctor
+import qualified Data.Foldable (toList)
 
 type NPallets = Float
 truckCapacity :: NPallets
@@ -29,49 +32,55 @@ type TruckID = Int
 type TransportSegment = (Site, Site)
 
 class (Eq a, Show a) => Route a where
-  sites :: a -> [Site]
+  sites :: a -> Seq Site
   volume :: a -> NPallets
   appendSite :: a -> Site -> a
   dest :: a -> Site
+  {-
   isCoveredBy :: a -> a -> Bool
   isCoveredBy tc1 tc2 = sites tc1 `L.isSubsequenceOf` sites tc2
+  -}
   crossesSite :: a -> Site -> Bool
   crossesRoute :: a -> a -> Bool
   isSingleton :: a -> Bool
-  segments :: a -> [TransportSegment]
-  prune :: a -> (Maybe a, TransportSegment) -- the dropped transport segment
+  segments :: a -> Seq TransportSegment
+  -- prune :: a -> (Maybe a, TransportSegment) -- the dropped transport segment
   (=|=) :: a -> a -> Bool
   pp :: a -> String
-  pp r = "{" ++ L.intercalate " -> " (map show $ reverse $ sites r) ++ "}"
+  pp r = "{" ++ L.intercalate " -> " (show <$> Data.Foldable.toList (S.reverse $ sites r)) ++ "}"
 
 -- by definiton TruckCycles start and end at DC
-data TruckCycle = MkTruckCycle { tcSites :: [Site], initialLoad :: NPallets }
+data TruckCycle = MkTruckCycle { tcSites :: Seq Site, initialLoad :: NPallets }
   deriving Eq
 
 instance Show TruckCycle where
   show tc = "T<" ++ (show . initialLoad) tc ++ "> :: " ++ pp tc
 
 instance Route TruckCycle where
-  sites tc = Origin : tcSites tc ++ [Origin]
-  appendSite tc s = tc { tcSites = s : tcSites tc }
+  sites tc = (Origin :<| tcSites tc) :|> Origin
+  appendSite tc s = tc { tcSites = s :<| tcSites tc }
   dest _ = Origin -- dummy for now
-  crossesSite tc site = site `elem` sites tc
+  crossesSite tc site = site `elem` S.drop 1 (tcSites tc)
   --crossesRoute tc1 tc2 = not $ disjoint (tcSites tc1) (tcSites tc2)
-  crossesRoute tc1 tc2 = hasAny (tcSites tc1) (tcSites tc2)
-  segments = segsFromList . sites
+  crossesRoute tc1 tc2 = any (`elem` tcSites tc1) (tcSites tc2)
+  segments tc = segsFromSeqs (sites tc)
   isSingleton tc = length (tcSites tc) == 1
   volume = initialLoad
   (=|=) = (==)
+  {-
   prune :: TruckCycle -> (Maybe TruckCycle, TransportSegment)
+  prune (MkPalletRoute (s1:<|s2:<|ss) pal) = (Just (MkPalletRoute (s2:<|ss) pal), (s1, s2))
+  prune (MkPalletRoute (s1:<|Empty) pal) = (Nothing, (s1, Origin))
+  
   prune tc = (maybeTc tc, head $ segments tc)
     where
       maybeTc tc
         | length (tcSites tc) <= 1 = Nothing  -- a PalletRoute with no sites should be Nothing
         | otherwise      = Just tc {tcSites = tail $ tcSites tc }
-
+  -}
 
 -- by definition PalletRoute starts at DC.
-data PalletRoute = MkPalletRoute {prSites :: [Site], pallets :: NPallets}
+data PalletRoute = MkPalletRoute {prSites :: Seq Site, pallets :: NPallets}
 
 instance Eq PalletRoute where
   (==) pr1 pr2 = prSites pr1 == prSites pr2
@@ -80,30 +89,42 @@ instance Show PalletRoute where
   show pr = "P<" ++ (show . pallets) pr ++ "> :: " ++ pp pr
 
 instance Route PalletRoute where
-  sites (MkPalletRoute ss _) = ss ++ [Origin]
-  appendSite (MkPalletRoute ss n) s = MkPalletRoute (s:ss) n
-  dest = head . prSites
-  crossesSite pr site = site `elem` tail (prSites pr)
+  sites (MkPalletRoute ss _) = ss :|> Origin
+  appendSite (MkPalletRoute ss n) s = MkPalletRoute (s :<| ss) n
+  dest pr =
+    case prSites pr of
+      s1 :<| ss -> s1
+      _ -> error "empty pallet route should not exist"
+  crossesSite pr site = site `elem` S.drop 1 (prSites pr)
   --crossesRoute pr1 pr2 = not $ disjoint (prSites pr1) (prSites pr2)
-  crossesRoute pr1 pr2 = hasAny (prSites pr1) (prSites pr2)
+  crossesRoute pr1 pr2 = any (`elem` prSites pr1) (prSites pr2)
   isSingleton pr = length (prSites pr) == 1
-  segments pr = segsFromList (sites pr)
+  segments pr = segsFromSeqs (sites pr)
   (=|=) pr1 pr2 = prSites pr1 == prSites pr2
   volume = pallets
-  prune :: PalletRoute -> (Maybe PalletRoute, TransportSegment)
-  prune pr = (maybePr pr, head $ segments pr)
-    where
-      maybePr (MkPalletRoute ss n)
-        | length ss <= 1 = Nothing  -- a PalletRoute with no sites should be Nothing
-        | otherwise      = Just (MkPalletRoute (tail ss) n)
+
+prune :: PalletRoute -> (Maybe PalletRoute, TransportSegment)
+prune (MkPalletRoute (s1:<|s2:<|ss) pal) = (Just (MkPalletRoute (s2:<|ss) pal), (s1, s2))
+prune (MkPalletRoute (s1:<|Empty) pal) = (Nothing, (s1, Origin))
+{-
+prune pr = (maybePr pr, head $ segments pr)
+  where
+    maybePr (MkPalletRoute ss n)
+      | length ss <= 1 = Nothing  -- a PalletRoute with no sites should be Nothing
+      | otherwise      = Just (MkPalletRoute (tail ss) n)
+-}
 
 instance Semigroup PalletRoute where -- not commutative!
-  pr1 <> pr2 = MkPalletRoute (prSites pr2 ++ prSites pr1) (pallets pr2)
+  pr1 <> pr2 = MkPalletRoute (prSites pr2 >< prSites pr1) (pallets pr2)
 
 
 segsFromList :: Eq a => [a] -> [(a, a)]
 segsFromList = zip <*> tail
 
+segsFromSeqs :: Eq a => Seq a -> Seq (a, a)
+segsFromSeqs = S.zip <*> shift
+  where
+    shift (s :<| tail) = tail
 
 type DistanceMatrix = M.Matrix Float
 distance :: DistanceMatrix -> Site -> Site -> Float
@@ -147,14 +168,24 @@ leafRoutes :: Route a => Network a -> [a]
 leafRoutes net = filter isLeafRoute $ routes net where
   isLeafRoute r = not $ any (`crossesSite` dest r) (routes net)
 
+
 leafRouteWithSite :: Route a => Network a -> Site -> Maybe a
 leafRouteWithSite net site =
-  case filter (\r -> head (sites r) == site) (leafRoutes net) of
+  case filter (`isEnd` site) (leafRoutes net) of
     [] -> Nothing
     (s:ss) -> Just s
 
+  where
+    isEnd pr site =
+      case sites pr of
+        start :<| tail -> site == start
+        _ -> False
+
+
+{-
 coveredRoutes :: Route a => Network a -> a -> [a]
 coveredRoutes net route = filter (`isCoveredBy` route) (routes net)
+-}
 
 type TN = Network TruckCycle
 type PN = Network PalletRoute
@@ -190,14 +221,31 @@ addNewTruckCycles tn _ NZero = tn
 addNewTruckCycles tn sites n = iterate (addNewTruckCycle sites) tn ! n
 -}
 
+
+{-
+isPartOfRoute :: Route a => TransportSegment -> a -> Bool
+isPartOfRoute (s1, s2) route =
+  (s1 :<| s2 :<| Empty) `elem` S.chunksOf 2 (sites route)
+-}
+
+isPartOfRoute :: Route a => TransportSegment -> a -> Bool
+isPartOfRoute (s1, s2) route =
+  let
+    ss = sites route
+  in
+    case S.elemIndexL s1 ss of
+      Nothing -> False
+      Just i ->
+        case ss !? (i+1) of
+          Nothing -> False
+          Just k -> k == s2
+
+
 requiredPallets :: PN -> TransportSegment -> NPallets
-requiredPallets pn seg = sum $ pallets <$> filter pred (routes pn)
-  where
-    pred r = [fst seg, snd seg] `L.isSubsequenceOf` sites r
-    -- pred r = seg `L.elem` segments r
+requiredPallets pn seg = sum $ pallets <$> filter (isPartOfRoute seg) (routes pn)
 
 trucksOnSegment :: TN -> TransportSegment -> [TruckCycle]
-trucksOnSegment tn seg = filter (\ x -> seg `elem` segments x) (routes tn)
+trucksOnSegment tn seg = filter (isPartOfRoute seg) (routes tn)
 {- 
 truckloadsOnSegment :: TN -> TransportSegment -> [NPallets]
 truckloadsOnSegment tn seg = initialLoad <$> trucksOnSegment tn seg
@@ -216,14 +264,14 @@ dropTruckCycles tn (tc:tcs) = dropped_tn { routes = L.delete tc (routes dropped_
   where
     dropped_tn = dropTruckCycles tn tcs
 
-addTrucks :: TN -> [Site] -> NPallets -> TN
+addTrucks :: TN -> Seq Site -> NPallets -> TN
 -- addTrucks tn sites load | traceShow (tn, load) False = undefined
 addTrucks tn sites load
   | load == 0 = tn
   | load <= truckCapacity = tn { routes = MkTruckCycle sites load : routes tn }
   | load > truckCapacity = addTrucks (addTrucks tn sites truckCapacity) sites (load - truckCapacity)
 
-addRequiredTruckLoads :: TN -> [Site] -> TransportSegment -> NPallets -> TN
+addRequiredTruckLoads :: TN -> Seq Site -> TransportSegment -> NPallets -> TN
 addRequiredTruckLoads tn sites seg req_pallets
   | rest <= 0 = tn
   | otherwise = new_tn

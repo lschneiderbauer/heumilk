@@ -16,6 +16,7 @@ import System.Random
 
 import qualified Data.Vector as V
 import qualified Data.Matrix.Unboxed as M
+import qualified Data.Sequence as S
 
 siteList n = Origin : (Site <$> [1..n])
 
@@ -75,4 +76,4 @@ createInitialState dem distMat =
     error "The given distance matrix is not covering all sites with demands."
   where
     rs = V.toList $ V.imap to_pr (V.drop 0 dem)
-    to_pr i dem = MkPalletRoute {prSites = [Site (i+1)], pallets = dem }
+    to_pr i dem = MkPalletRoute {prSites = S.singleton $ Site (i+1), pallets = dem }
